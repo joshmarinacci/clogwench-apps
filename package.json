@@ -1,0 +1,14 @@
+{
+  "name": "clogwench-apps",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "clean":   "cd common && npm run clean  && cd ..",
+    "install": "cd common && npm install    && cd ..",
+    "build":   "cd common && npm run build  && cd ..",
+    "full-clean": "cd common && npm run full-clean && cd .."
+  },
+  "author": "josh@josh.earth",
+  "license": "ISC"
+}
