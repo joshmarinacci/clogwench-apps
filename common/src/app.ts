@@ -53,7 +53,13 @@ export class App {
     }
 
     send(obj) {
-        let str = JSON.stringify(obj)
+        let src = this.id
+        if(!src) src = "00000000-0000-0000-0000-000000000000";
+        let msg = {
+            source:src,
+            command:obj,
+        }
+        let str = JSON.stringify(msg)
         // console.log('sending',str)
         this.client.write(str)
     }

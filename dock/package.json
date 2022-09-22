@@ -15,6 +15,7 @@
   },
   "scripts": {
     "start": "node --experimental-specifier-resolution=node build/index.js",
-    "build": "rm -rf build; tsc"
+    "build": "rm -rf build; tsc",
+    "dev": "npm run build && npm run start"
   }
 }
