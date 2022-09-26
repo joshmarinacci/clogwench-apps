@@ -1,0 +1,20 @@
+{
+  "name": "simple-browser",
+  "version": "0.0.1",
+  "main": "build/index.js",
+  "module": "build/module.js",
+  "type": "module",
+  "dependencies": {
+    "thneed-gfx": "^0.1.46",
+    "thneed-idealos-common": "^0.0.5"
+  },
+  "devDependencies": {
+    "typescript": "^4.7.2",
+    "@types/node": "^17.0.44"
+  },
+  "scripts": {
+    "start": "node --experimental-specifier-resolution=node build/index.js",
+    "build": "rm -rf build; tsc",
+    "dev": "npm run build && npm run start"
+  }
+}
