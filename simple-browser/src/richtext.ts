@@ -4,6 +4,7 @@ import {
     POINTER_MOVE,
     PointerEvent, Rect, Size, SurfaceContext
 } from "thneed-gfx"
+import {make_logger} from "josh_js_util";
 
 export type TextStyle = {
     font: string,
@@ -96,6 +97,8 @@ class WhitespaceIterator {
     }
 
 }
+
+const log = make_logger("richtext")
 
 function make_line_box(txt: string, w: number, h: number, pt: Point, style:TextStyle): LineBox {
     let line: LineBox = {
@@ -234,14 +237,12 @@ function find_box(root: RootBox, position: Point):any {
 }
 
 function do_render(root: RootBox, g: SurfaceContext, selected_box: any) {
+    log.info("surface context is",g)
     let pos = root.position as Point
     let size = root.size as Size
-    //@ts-ignore
-    let ctx:CanvasRenderingContext2D = g.ctx
-    ctx.fillStyle =root.style.background_color
-    ctx.fillRect(pos.x, pos.y, size.w, size.h)
-    ctx.save()
-    ctx.translate(pos.x, pos.y)
+    g.fill(new Rect(pos.x,pos.y,size.w,size.h), root.style.background_color)
+    // ctx.save()
+    // ctx.translate(pos.x, pos.y)
 
     function stroke_box(g: SurfaceContext, blk:any, color:string) {
         let pos = blk.position as Point
@@ -257,15 +258,15 @@ function do_render(root: RootBox, g: SurfaceContext, selected_box: any) {
             g.fill(r, blk.style.border_color)
             g.fill(r.shrink(blk.style.border_width*2),blk.style.background_color)
         } else {
-            ctx.fillStyle = blk.style.background_color
-            ctx.fillRect(pos.x, pos.y, size.w, size.h)
+            let r = new Rect(pos.x,pos.y,size.w,size.h)
+            g.fill(r,blk.style.background_color)
         }
-        ctx.save()
-        ctx.translate(pos.x, pos.y)
+        // ctx.save()
+        // ctx.translate(pos.x, pos.y)
         blk.lines.forEach((ln:LineBox) => {
             let pos = ln.position as Point
-            ctx.save()
-            ctx.translate(pos.x, pos.y);
+            // ctx.save()
+            // ctx.translate(pos.x, pos.y);
             ln.spans.forEach((spn:SpanBox) => {
                 let pos = spn.position
                 let font = (spn.style.weight === 'bold')?'bold':'base'
@@ -274,17 +275,17 @@ function do_render(root: RootBox, g: SurfaceContext, selected_box: any) {
                     g.fill(new Rect(pos.x,pos.y,ln.size.w,2), spn.style.color)
                 }
             })
-            ctx.restore()
+            // ctx.restore()
             if(ln === selected_box) {
                 stroke_box(g,ln, 'red')
             }
         })
-        ctx.restore()
+        // ctx.restore()
         if(blk === selected_box) {
             stroke_box(g,blk, 'red')
         }
     })
-    ctx.restore()
+    // ctx.restore()
 }
 
 export class RichTextArea extends BaseView {

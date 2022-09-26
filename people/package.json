@@ -6,14 +6,15 @@
   "type": "module",
   "dependencies": {
     "thneed-gfx": "^0.1.45",
-    "typescript": "^4.7.2"
+    "thneed-idealos-common": "^0.0.5"
   },
   "devDependencies": {
-    "@types/node": "^17.0.44",
-    "thneed-idealos-common": "^0.0.4"
+    "typescript": "^4.7.2",
+    "@types/node": "^17.0.44"
   },
   "scripts": {
+    "start": "node --experimental-specifier-resolution=node build/index.js",
     "build": "rm -rf build; tsc",
-    "start": "node --experimental-specifier-resolution=node build/index.js"
+    "dev": "npm run build && npm run start"
   }
 }

@@ -1,21 +1,9 @@
 import {
     ActionButton,
-    BaseParentView, BaseView, CheckButton,
-    COMMAND_ACTION,
-    COMMAND_CHANGE, CoolEvent, DebugLayer, FillChildPanel,
-    HBox, HSpacer, KEYBOARD_CATEGORY, KEYBOARD_DOWN, KeystrokeCaptureView,
-    Label, Point,
-    POINTER_CATEGORY, POINTER_DOWN, POINTER_DRAG,
     Rect, ScrollView,
-    Size,
-    SurfaceContext,
-    TextLine, ToggleButton,
-    VBox,
-    KeyboardEvent,
-    PointerEvent,
     View, with_props,
 } from "thneed-gfx";
-import {App,ClogwenchWindowSurface, DBObj} from "thneed-idealos-common"
+import {App,ClogwenchWindowSurface} from "thneed-idealos-common"
 import {BlockStyle, Paragraph, RichTextArea, TextStyle} from "./richtext";
 
 let plain:TextStyle = {
@@ -85,7 +73,7 @@ let DOC:Paragraph[] = [
 ]
 
 
-function make_main_view(surface, app):View {
+function make_main_view(surface:ClogwenchWindowSurface, app:App):View {
     let scroll = new ScrollView();
     scroll.set_hflex(true)
     scroll.set_vflex(true)
@@ -110,10 +98,10 @@ async function doit() {
     let win = await app.open_window(new Rect(50, 50, 600, 300))
     let surface = new ClogwenchWindowSurface(win);
     start(app,surface)
-    // app.on_close_window(() => {
-    //     console.log("window closed. quitting")
-    //     process.exit(0)
-    // })
+    app.on_close_window(() => {
+        console.log("window closed. quitting")
+        process.exit(0)
+    })
 }
 
 doit().then(() => console.log("fully started")).catch((e) => console.error(e))

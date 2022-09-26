@@ -236,109 +236,20 @@ class CompoundListView extends BaseParentView {
     }
 }
 
-class DividerView extends BaseView {
-    private splitView: SplitView;
-    constructor(splitView: SplitView) {
-        super("divider-view");
-        this.splitView = splitView
-    }
-    input(event: CoolEvent) {
-        if(event.category === POINTER_CATEGORY) {
-            if(event.type === POINTER_DRAG) {
-                let e = event as PointerEvent
-                this.splitView.split_value += e.delta.x
-            }
-        }
-    }
-
-    draw(g: SurfaceContext): void {
-        g.fillBackgroundSize(this.size(),'#888888')
-    }
-
-    layout(g: SurfaceContext, available: Size): Size {
-        this.set_size(new Size(10,available.h))
-        return this.size()
-    }
-}
-
-class SplitView extends BaseView {
-    first:View
-    divider:View
-    second:View
-    split_value: number;
-    constructor() {
-        super("split-view");
-        this.divider = new DividerView(this)
-        this.split_value = 200
-    }
-
-    override draw(g: SurfaceContext) {
-        g.fillBackgroundSize(this.size(),'red')
-    }
-
-    clip_children(): boolean {
-        return false;
-    }
-    is_parent_view(): boolean {
-        return true
-    }
-    get_children(): View[] {
-        return [this.first,this.divider,this.second]
-    }
-
-    layout(g: SurfaceContext, available: Size): Size {
-        this.set_size(available)
-        let ch_w = this.split_value
-        let ch_h = available.h
-        if(this.first) {
-            this.first.layout(g, new Size(ch_w,ch_h))
-            this.first.set_position(new Point(0,0))
-        }
-        let dsize = this.divider.layout(g, new Size(10,available.h))
-        this.divider.set_position(new Point(ch_w,0))
-        if(this.second) {
-            this.second.layout(g, new Size(this.size().w - dsize.w - ch_w,ch_h))
-            this.second.set_position(new Point(ch_w+dsize.w,0))
-        }
-        return this.size()
-    }
-    can_receive_mouse(): boolean {
-        return false;
-    }
-
-    set_first(view: View) {
-        this.first = view
-    }
-
-    set_second(view: View) {
-        this.second = view
-    }
-}
-
 function make_main_view(surface, app):View {
-    let scroll = new ScrollView();
-    scroll.set_hflex(true)
-    scroll.set_vflex(true)
-    // scroll.set_content(with_props(new RichTextArea(), {doc:DOC}))
-    scroll.set_content(with_props(new ActionButton(),{caption:"button here"}))
-    let root = with_props(new SplitView(), {hflex:true, vflex:true, name:'banana-split'}) as SplitView
-    root.set_first(scroll)
-
     let vbox = new VBox()
     vbox.set_vflex(true)
-    vbox.set_fill('white')
     vbox.set_hflex(true)
 
     let toolbar = new HBox()
     toolbar.set_hflex(true)
     let add = new ActionButton()
-    add.set_caption("add")
+    add.set_caption("add item")
     toolbar.add(add)
     vbox.add(toolbar)
 
     let list_view = with_props(new CompoundListView(), {name:'main-view', vflex:true, hflex:true}) as CompoundListView
     DATA.forEach(td => list_view.add_item(make_item_view(td)))
-    // root.set_second(list_view)
     vbox.add(list_view)
 
     add.on(COMMAND_ACTION,() => {
@@ -350,9 +261,7 @@ function make_main_view(surface, app):View {
         DATA.push(new_item)
         list_view.add_item(make_item_view(new_item))
     })
-
-    root.set_second(vbox)
-    return root
+    return vbox
 }
 
 function start(app: App, surface: ClogwenchWindowSurface) {

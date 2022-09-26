@@ -2,7 +2,7 @@
   "name": "simple-browser",
   "version": "0.0.1",
   "main": "build/index.js",
-  "module": "build/module.js",
+  "module": "build/index.js",
   "type": "module",
   "dependencies": {
     "thneed-gfx": "^0.1.46",
