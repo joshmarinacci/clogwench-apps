@@ -43,7 +43,8 @@
       "id": "app-05-tasks",
       "data": {
         "type": "application-definition",
-        "title": "task manager / todo list",
+        "title": "Todos",
+        "description": "task manager / todo list",
         "path": "./tasks",
         "command": "npm run start"
       }

@@ -4,59 +4,44 @@ import {
     Label, TextLine,
 } from "thneed-gfx";
 import * as child_process from "child_process";
+import path from "path";
 import {App, ClogwenchWindowSurface} from "thneed-idealos-common";
 
 
-function start(surface: ClogwenchWindowSurface) {
+function start(surface: ClogwenchWindowSurface, app:App) {
     let vbox = new VBox()
 
     let label = new Label()
     label.set_caption('Dock')
     vbox.add(label)
 
-    let music_button = new ActionButton()
-    music_button.set_caption('Music')
-    music_button.on(COMMAND_ACTION, () => {
-        console.log("launching the music app")
-        child_process.spawn('npm',['run','start'],{
-            cwd:'../musicplayer/',
-            detached:true,
+    const refresh_list = async () => {
+        let results = await app.db_query(
+            [{
+                kind:'equals',
+                key:'type',
+                value:'application-definition',
+            }]
+        )
+        console.log("results is",results)
+        results.forEach(info => {
+            let button = new ActionButton()
+            button.set_caption(info.data.title)
+            button.on(COMMAND_ACTION, () => {
+                let pth = path.join("..",info.data.path);
+                pth = path.normalize(pth);
+                console.log(`launching:${info.data.command} in dir ${pth}`)
+                child_process.spawn('npm',['run','start'],{
+                    cwd:pth,
+                    detached:true,
+                })
+            })
+            vbox.add(button)
         })
-    })
-    vbox.add(music_button)
+        surface.repaint()
+    }
 
-    let texteditor = new ActionButton()
-    texteditor.set_caption('TextEdit')
-    texteditor.on(COMMAND_ACTION, () => {
-        console.log("launching the text editor app")
-        child_process.spawn('npm',['run','start'],{
-            cwd:'../textedit/',
-            detached:true,
-        })
-    })
-    vbox.add(texteditor)
-
-    let people = new ActionButton()
-    people.set_caption('People')
-    people.on(COMMAND_ACTION, () => {
-        console.log("launching the people app")
-        child_process.spawn('npm',['run','start'],{
-            cwd:'../people/',
-            detached:true,
-        })
-    })
-    vbox.add(people)
-
-    let clock_button = new ActionButton()
-    clock_button.set_caption('Clock')
-    clock_button.on(COMMAND_ACTION, () => {
-        console.log("launching the clock app")
-        child_process.spawn('cargo',['run'],{
-            cwd:'../digital-clock/',
-            detached:true,
-        })
-    })
-    vbox.add(clock_button)
+    refresh_list()
 
 
     let quit_button = new ActionButton()
@@ -71,6 +56,10 @@ function start(surface: ClogwenchWindowSurface) {
     root.add(vbox)
     surface.set_root(root)
     surface.start_input()
+    app.on_close_window(() => {
+        console.log("window was closed");
+        process.exit(0)
+    })
 }
 
 async function doit() {
@@ -79,7 +68,7 @@ async function doit() {
     await app.send_and_wait({AppConnect: {HelloApp: {}}})
     let win = await app.open_window(new Rect(50, 50, 100, 300))
     let surface = new ClogwenchWindowSurface(win);
-    start(surface)
+    start(surface,app)
 }
 
 doit().then(() => console.log("fully started")).catch((e) => console.error(e))
