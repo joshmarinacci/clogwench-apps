@@ -1,0 +1,61 @@
+{
+  "data": [
+    {
+      "id": "app-01-dock",
+      "data": {
+        "type": "application-definition",
+        "title": "Dock",
+        "description": "app launcher",
+        "path": "./dock",
+        "command": "npm run start"
+      }
+    },
+    {
+      "id": "app-02-musicplayer",
+      "data": {
+        "type": "application-definition",
+        "title": "Music",
+        "description": "Music library player",
+        "path": "./musicplayer",
+        "command": "npm run start"
+      }
+    },
+    {
+      "id": "app-03-people",
+      "data": {
+        "type": "application-definition",
+        "title": "People",
+        "description": "contacts addressbook",
+        "path": "./people",
+        "command": "npm run start"
+      }
+    },
+    {
+      "id": "app-04-browser",
+      "data": {
+        "type": "application-definition",
+        "title": "Doc Browser",
+        "path": "./simple-browser",
+        "command": "npm run start"
+      }
+    },
+    {
+      "id": "app-05-tasks",
+      "data": {
+        "type": "application-definition",
+        "title": "task manager / todo list",
+        "path": "./tasks",
+        "command": "npm run start"
+      }
+    },
+    {
+      "id": "app-06-textedit",
+      "data": {
+        "type": "application-definition",
+        "title": "a text editor",
+        "path": "./textedit",
+        "command": "npm run start"
+      }
+    }
+  ]
+}
