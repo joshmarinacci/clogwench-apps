@@ -21,12 +21,12 @@ export class App {
     async connect() {
         return new Promise<void>((res, rej) => {
             this.client.connect(STD_PORT, '127.0.0.1', (): void => {
-                // console.log('connected event')
+                console.log('connected event')
                 res()
             })
             this.client.on('data', (data: Buffer) => {
                 let str = data.toString()
-                // console.log("raw incoming data", str)
+                console.log("raw incoming data", str)
                 try {
                     let msg = JSON.parse(str)
                     if (msg.AppConnectResponse) {

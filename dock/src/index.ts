@@ -3,8 +3,8 @@ import {
     VBox,
     Label, TextLine,
 } from "thneed-gfx";
-import {App,ClogwenchWindowSurface} from "../../common/build/index";
 import * as child_process from "child_process";
+import {App, ClogwenchWindowSurface} from "thneed-idealos-common";
 
 
 function start(surface: ClogwenchWindowSurface) {

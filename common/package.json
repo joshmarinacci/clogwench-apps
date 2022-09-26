@@ -1,6 +1,6 @@
 {
   "name": "thneed-idealos-common",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "",
   "type": "module",
   "main": "build/index.js",
