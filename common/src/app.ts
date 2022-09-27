@@ -175,7 +175,7 @@ export class Window {
         this.bounds = info.bounds
         this.listeners = new Map<string, Callback>();
         this.buffer = new BufferImage(this.bounds.w,this.bounds.h)
-        this.buffered = false
+        this.buffered = true
     }
 
 

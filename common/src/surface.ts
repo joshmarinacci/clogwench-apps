@@ -58,7 +58,6 @@ export function ideal_os_key_to_thneed_code(inp:IdealosKeyEvent):IdealosKeyEvent
     return out
 }
 
-// console.log("surface loaded font",basefont_data)
 export class BufferImage {
     width: number;
     height: number;
