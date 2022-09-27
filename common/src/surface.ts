@@ -58,6 +58,18 @@ export function ideal_os_key_to_thneed_code(inp:IdealosKeyEvent):IdealosKeyEvent
     return out
 }
 
+type BufferGlyph = {
+    w:number,
+    h:number,
+    meta:{
+        left:number,
+        right:number,
+        baseline:number,
+        codepoint:number,
+    },
+    data:number[],
+    img:BufferImage|undefined,
+}
 export class BufferImage {
     width: number;
     height: number;
@@ -85,6 +97,20 @@ export class BufferImage {
         this.buffer_data[n*4 + 2] = color.g
         this.buffer_data[n*4 + 3] = color.b
     }
+    get_pixel(x:number,y:number):Color {
+        if(x<0) return MAGENTA
+        if(y<0) return MAGENTA
+        if(x >= this.width) return MAGENTA
+        if(y >= this.height) return MAGENTA
+        let n = (y*this.width+x)
+        let color:Color = {
+            a: this.buffer_data[n*4+0],
+            r: this.buffer_data[n*4+1],
+            g: this.buffer_data[n*4+2],
+            b: this.buffer_data[n*4+3],
+        }
+        return color
+    }
 
     draw_rect(rect: Rect, color:Color):void {
         for(let i = rect.x; i<rect.right(); i++) {
@@ -95,18 +121,28 @@ export class BufferImage {
         }
     }
 
-    draw_image(rect: Rect, img: BufferImage) {
-        this.draw_rect(rect,MAGENTA);
+    draw_image(dst_rect: Rect, img: BufferImage) {
+        // console.log("buffer drawing image",dst_rect,img)
+        this.draw_rect(dst_rect,MAGENTA);
+        for(let i = dst_rect.x; i<dst_rect.right(); i++) {
+            for(let j=dst_rect.y; j<dst_rect.bottom(); j++) {
+                let sx = i-dst_rect.x
+                let sy = j-dst_rect.y
+                let c = img.get_pixel(sx,sy);
+                // console.log("setting",i,j,'from',sx,sy,'color',c)
+                this.set_pixel(i,j,c)
+            }
+        }
     }
 }
 export class BufferFont {
     private data: any;
-    private metas:Map<number,SpriteGlyph>;
+    private metas:Map<number,BufferGlyph>;
     private scale = 1;
     constructor(data) {
         this.data = data
         this.metas = new Map();
-        this.data.glyphs.forEach(gl => {
+        this.data.glyphs.forEach((gl:BufferGlyph) => {
             this.generate_image(gl)
             this.metas.set(gl.meta.codepoint,gl)
         })
@@ -142,10 +178,6 @@ export class BufferFont {
             let dx = x + xoff*this.scale*scale
             if (this.metas.has(cp)) {
                 let glyph = this.metas.get(cp)
-                // ctx.imageSmoothingEnabled = false
-                //@ts-ignore
-                // let img = glyph.img
-                // console.log(glyph)
                 let sx = glyph.meta.left
                 let sy = 0
                 let sw = glyph.w - glyph.meta.left - glyph.meta.right
@@ -153,18 +185,14 @@ export class BufferFont {
                 let dy = y + (yoff+glyph.meta.baseline-1)*this.scale*scale
                 let dw = sw*this.scale*scale
                 let dh = sh*this.scale*scale
-                // @ts-ignore
-                // console.log("bf: ", glyph.img)
-                // win.draw_rect(new Rect(dx,dy,dw,dh),BLACK)
-                win.draw_image(new Rect(dx,dy,dw,dh), glyph.img)
-                // ctx.drawImage(img, sx,sy,sw,sh, dx,dy, dw,dh)
+                let r = new Rect(dx,dy,dw,dh)
+                win.draw_image(r, glyph.img)
                 xoff += sw + 1
             } else {
                 //missing the glyph
                 let ew = 8
                 let dy = y + (yoff)*this.scale*scale
                 win.draw_rect(new Rect(dx,dy,8,8),BLACK)
-                // ctx.strokeRect(dx,dy,ew*this.scale*scale,ew*this.scale*scale)
                 xoff += ew + 1
 
             }
@@ -200,8 +228,8 @@ export class BufferFont {
         }
     }
 
-    private generate_image(gl) {
-        // this.log("generate image")
+    private generate_image(gl:BufferGlyph) {
+        // this.log("generate image for ",gl.meta.codepoint)
         let w = gl.w-gl.meta.left-gl.meta.right
         gl.img = new BufferImage(w,gl.h)
         // c.fillRect(0,0,gl.img.width,gl.img.height)

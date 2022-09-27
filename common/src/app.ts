@@ -248,7 +248,7 @@ export class Window {
 
     flush() {
         if(this.buffered) {
-            console.log("sending to the server")
+            // console.log("flush called to send to the server")
             this.app.send({
                 DrawImageCommand: {
                     app_id: this.app_id,
