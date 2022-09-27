@@ -188,7 +188,7 @@ function start(surface: ClogwenchWindowSurface, app:App) {
     surface.start_input()
 
     setTimeout(async () => {
-        refresh_list()
+        await refresh_list()
     },500)
 
 }

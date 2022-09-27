@@ -1,43 +1,27 @@
 import {
     ActionButton,
-    BaseParentView, BaseView, CheckButton,
+    BaseParentView, CheckButton,
     COMMAND_ACTION,
-    COMMAND_CHANGE, CoolEvent, DebugLayer, FillChildPanel,
-    HBox, HSpacer, KEYBOARD_CATEGORY, KEYBOARD_DOWN, KeystrokeCaptureView,
-    Label, Point,
-    POINTER_CATEGORY, POINTER_DOWN, POINTER_DRAG,
-    Rect, ScrollView,
-    Size,
+    COMMAND_CHANGE, CoolEvent, HBox, HSpacer, KEYBOARD_CATEGORY, KEYBOARD_DOWN, Label, Point,
+    POINTER_DOWN, Rect, Size,
     SurfaceContext,
     TextLine, ToggleButton,
     VBox,
     KeyboardEvent,
-    PointerEvent,
-    View, with_props,
+    View, with_props, calculate_style, Style,
 } from "thneed-gfx";
-import {App,ClogwenchWindowSurface, DBObj} from "thneed-idealos-common"
+import {App,ClogwenchWindowSurface} from "thneed-idealos-common"
 
 type TodoItem = {
-    desc:string,
-    completed:boolean,
-    tags:string[],
+    id:string,
+    data: {
+        type:"task-item",
+        description: string,
+        completed: boolean,
+        tags: string[],
+    }
 }
 let DATA:TodoItem[] = [
-    {
-        desc:"first item",
-        completed:false,
-        tags:[],
-    },
-    {
-        desc:"second item",
-        completed:true,
-        tags:['never'],
-    },
-    {
-        desc:"third item",
-        completed:false,
-        tags:['good','better','best'],
-    },
 ]
 
 class EditableLabel extends BaseParentView {
@@ -92,11 +76,11 @@ class EditableLabel extends BaseParentView {
 
 function make_item_view(td: TodoItem):View {
     let ed_lab = new EditableLabel()
-    ed_lab.set_text(td.desc)
-    let box = with_props(new VBox(),{fill:'yellow'}) as VBox
-    let row = with_props(new HBox(), {fill:'#eee', hflex:true}) as HBox
-    let cb = with_props(new CheckButton(), {caption:'c', selected:td.completed})
-    cb.on(COMMAND_CHANGE,(e)=>td.completed = e.target.selected())
+    ed_lab.set_text(td.data.description)
+    let box = with_props(new VBox(),{}) as VBox
+    let row = with_props(new HBox(), {hflex:true}) as HBox
+    let cb = with_props(new CheckButton(), {caption:'c', selected:td.data.completed})
+    cb.on(COMMAND_CHANGE,(e)=>td.data.completed = e.target.selected())
     row.add(cb)
     // row.add(with_props(new Label(),{caption:td.desc}))
     row.add(ed_lab)
@@ -111,7 +95,7 @@ function make_item_view(td: TodoItem):View {
         ed_lab.set_editing(tog.selected())
         //if just finished editing, copy back the text
         if(!tog.selected()) {
-            td.desc = ed_lab.text()
+            td.data.description = ed_lab.text()
         }
     })
     // let ed = with_action(with_props(new ActionButton(),{caption:'edit'}) as ActionButton,()=>{
@@ -150,11 +134,8 @@ class ListItemView extends BaseParentView {
     }
 
     draw(g: SurfaceContext) {
-        if(this.list.selected_view() === this) {
-            g.fillBackgroundSize(this.size(), 'blue')
-        } else {
-            g.fillBackgroundSize(this.size(), 'white')
-        }
+        let style:Style = calculate_style("select-list",this.list.selected_view()===this);
+        g.fillBackgroundSize(this.size(), style.background_color)
     }
 
     layout(g: SurfaceContext, available: Size): Size {
@@ -172,7 +153,7 @@ class ListItemView extends BaseParentView {
 }
 
 class CompoundListView extends BaseParentView {
-    private sel: ListItemView;
+    private sel: ListItemView|null;
     constructor() {
         super("compound-list-view");
     }
@@ -204,7 +185,7 @@ class CompoundListView extends BaseParentView {
     }
 
     override draw(g: SurfaceContext) {
-        g.fillBackgroundSize(this.size(),'#f0f0f0')
+        // g.fillBackgroundSize(this.size(),'#f0f0f0')
     }
 
     layout(g: SurfaceContext, available: Size): Size {
@@ -225,6 +206,10 @@ class CompoundListView extends BaseParentView {
         let item_view = new ListItemView(this);
         item_view.add(view)
         this.add(item_view)
+    }
+    remove_all_items() {
+        this._children = []
+        this.sel = null
     }
 
     set_selected_view(sel: ListItemView) {
@@ -252,15 +237,31 @@ function make_main_view(surface, app):View {
     DATA.forEach(td => list_view.add_item(make_item_view(td)))
     vbox.add(list_view)
 
+    const refresh_list = async () => {
+        let results = await app.db_query([{ kind:'equals', key:'type', value:'task-item'}])
+        list_view.remove_all_items()
+        results.forEach(item => list_view.add_item(make_item_view(item)))
+        surface.repaint()
+    }
+
     add.on(COMMAND_ACTION,() => {
         let new_item:TodoItem = {
-            completed: false,
-            desc: "no desc",
-            tags: ["two","tags"]
+            id:"",
+            data: {
+                type:"task-item",
+                completed: false,
+                description: "no desc",
+                tags: ["two", "tags"]
+            }
         }
         DATA.push(new_item)
         list_view.add_item(make_item_view(new_item))
     })
+
+    setTimeout(async () => {
+        await refresh_list()
+    },500)
+
     return vbox
 }
 
@@ -277,7 +278,7 @@ async function doit() {
     let app = new App()
     await app.connect()
     await app.send_and_wait({AppConnect: {HelloApp: {}}})
-    let win = await app.open_window(new Rect(50, 50, 600, 300))
+    let win = await app.open_window(new Rect(50, 50, 500, 300))
     let surface = new ClogwenchWindowSurface(win);
     start(app,surface)
     // app.on_close_window(() => {
