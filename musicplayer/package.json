@@ -5,7 +5,7 @@
   "type": "module",
   "dependencies": {
     "thneed-gfx": "^0.1.46",
-    "thneed-idealos-common": "^0.0.5",
+    "thneed-idealos-common": "^0.0.7",
     "josh_js_util": "^0.0.9"
   },
   "devDependencies": {

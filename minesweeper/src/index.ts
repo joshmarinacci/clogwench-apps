@@ -1,5 +1,4 @@
 import {App,ClogwenchWindowSurface} from "thneed-idealos-common"
-
 import {
     BaseView,
     CoolEvent,
@@ -9,7 +8,6 @@ import {
     PointerEvent,
     LayerView, Rect, Point,
 } from "thneed-gfx"
-// import {GridModel} from "../../../common/models";
 
 import {make_logger} from "josh_js_util";
 
@@ -163,6 +161,9 @@ class MinesweeperModel {
     }
 }
 
+const black = '#000000'
+const white = '#ffffff'
+
 class MinesweeperView extends BaseView {
     private model: MinesweeperModel;
     private scale: number;
@@ -182,7 +183,7 @@ class MinesweeperView extends BaseView {
             g.fill(r,color)
             if(!v.covered) {
                 let pos = new Point(x*this.scale+6,y*this.scale + 16+8)
-                g.fillText(`${v.adjacent}`,pos,'#000000','base')
+                g.fillText(`${v.adjacent}`,pos,white,'base')
             }
         })
         g.strokeBackgroundSize(this.size(),'#000000')
@@ -192,10 +193,10 @@ class MinesweeperView extends BaseView {
             let e = evt as PointerEvent
             let pt = e.position.divide_floor(this.scale);
             let cell = this.model.grid.get_at(pt);
-            console.log('cell is',cell);
+            // console.log('cell is',cell);
             if (cell.covered === true) {
                 cell.covered = false;
-                e.ctx.repaint()
+                // e.ctx.repaint()
             }
         }
     }
