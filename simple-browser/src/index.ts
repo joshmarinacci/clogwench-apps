@@ -9,29 +9,29 @@ import {BlockStyle, Paragraph, RichTextArea, TextStyle} from "./richtext";
 let plain:TextStyle = {
     font: "base",
     underline: false,
-    color:'black',
+    color:'#000000',
     weight:'plain'
 }
 let link:TextStyle = {
     font:"base",
     underline: true,
-    color: 'blue',
+    color: '#0000ff',
     weight:'plain',
 }
 let bold:TextStyle = {
     font: "base",
     underline: false,
-    color:'black',
+    color:'#000000',
     weight:'bold'
 }
 let block_plain:BlockStyle = {
-    background_color: "white",
+    background_color: "#ffffff",
     border_width: 0,
-    border_color: "black",
+    border_color: "#000000",
     padding_width: 5,
 }
 let block_header:BlockStyle = {
-    background_color: 'cyan',
+    background_color: '#00ffff',
     border_width: 1,
     border_color: "#444444",
     padding_width: 10
@@ -64,7 +64,7 @@ let DOC:Paragraph[] = [
     {
         runs:[
             {
-                text:"Third paragraph just has a single run of text in it.",
+                text:"Third paragraph just has a single run of text in it but has a block header style",
                 style: plain
             }
         ],
@@ -78,7 +78,6 @@ function make_main_view(surface:ClogwenchWindowSurface, app:App):View {
     scroll.set_hflex(true)
     scroll.set_vflex(true)
     scroll.set_content(with_props(new RichTextArea(), {doc:DOC}))
-    scroll.set_content(with_props(new ActionButton(),{caption:"button here"}))
     return scroll
 }
 
@@ -91,11 +90,10 @@ function start(app: App, surface: ClogwenchWindowSurface) {
 
 
 async function doit() {
-    console.log("making an app")
     let app = new App()
     await app.connect()
     await app.send_and_wait({AppConnect: {HelloApp: {}}})
-    let win = await app.open_window(new Rect(50, 50, 600, 300))
+    let win = await app.open_window(new Rect(50, 50, 300, 400))
     let surface = new ClogwenchWindowSurface(win);
     start(app,surface)
     app.on_close_window(() => {

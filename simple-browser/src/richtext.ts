@@ -119,9 +119,9 @@ function make_line_box(txt: string, w: number, h: number, pt: Point, style:TextS
 
 function do_layout(doc: Paragraph[], size: Size, g: SurfaceContext) {
     let root_style:BlockStyle = {
-        background_color: 'white',
+        background_color: '#ffffff',
         border_width: 0,
-        border_color: 'black',
+        border_color: '#000000',
         padding_width: 5,
     }
     let root: RootBox = {
@@ -237,55 +237,49 @@ function find_box(root: RootBox, position: Point):any {
 }
 
 function do_render(root: RootBox, g: SurfaceContext, selected_box: any) {
-    log.info("surface context is",g)
-    let pos = root.position as Point
+    let root_pos = root.position as Point
     let size = root.size as Size
-    g.fill(new Rect(pos.x,pos.y,size.w,size.h), root.style.background_color)
-    // ctx.save()
-    // ctx.translate(pos.x, pos.y)
+    g.fill(new Rect(root_pos.x,root_pos.y,size.w,size.h), root.style.background_color)
 
-    function stroke_box(g: SurfaceContext, blk:any, color:string) {
+    function stroke_box(g: SurfaceContext, blk:any, color:string, offset:Point) {
         let pos = blk.position as Point
+        pos = pos.add(offset)
         let size = blk.size as Size
         g.stroke(new Rect(pos.x,pos.y,size.w,size.h),color)
     }
 
     root.blocks.forEach(blk => {
-        let pos = blk.position as Point
+        let blk_pos = blk.position as Point
+        blk_pos = blk_pos.add(root_pos)
         let size = blk.size as Size
         if(blk.style.border_width > 0) {
-            let r = new Rect(pos.x,pos.y,size.w,size.h)
+            let r = new Rect(blk_pos.x,blk_pos.y,size.w,size.h)
             g.fill(r, blk.style.border_color)
             g.fill(r.shrink(blk.style.border_width*2),blk.style.background_color)
         } else {
-            let r = new Rect(pos.x,pos.y,size.w,size.h)
+            let r = new Rect(blk_pos.x,blk_pos.y,size.w,size.h)
             g.fill(r,blk.style.background_color)
         }
-        // ctx.save()
-        // ctx.translate(pos.x, pos.y)
         blk.lines.forEach((ln:LineBox) => {
-            let pos = ln.position as Point
-            // ctx.save()
-            // ctx.translate(pos.x, pos.y);
+            let line_pos = ln.position as Point
+            line_pos = line_pos.add(blk_pos)
             ln.spans.forEach((spn:SpanBox) => {
                 let pos = spn.position
+                pos = pos.add(line_pos)
                 let font = (spn.style.weight === 'bold')?'bold':'base'
                 g.fillStandardText(spn.text, pos.x, pos.y, font)
                 if(spn.style.underline) {
                     g.fill(new Rect(pos.x,pos.y,ln.size.w,2), spn.style.color)
                 }
             })
-            // ctx.restore()
             if(ln === selected_box) {
-                stroke_box(g,ln, 'red')
+                stroke_box(g,ln, 'red',blk_pos)
             }
         })
-        // ctx.restore()
         if(blk === selected_box) {
-            stroke_box(g,blk, 'red')
+            stroke_box(g,blk, 'red',blk_pos)
         }
     })
-    // ctx.restore()
 }
 
 export class RichTextArea extends BaseView {
