@@ -1,9 +1,19 @@
 import {Socket} from "net";
 import {Rect, Size, Callback} from "thneed-gfx";
 import {BufferImage} from "./surface";
+import {make_logger} from "josh_js_util";
+
+let log = make_logger("APP")
 
 const STD_PORT = 3333
 
+
+type IncomingMessage = {
+    source:string,
+    command:any,
+    trace:boolean,
+    timestamp_usec:number,
+}
 export class App {
     private client: Socket
     private windows: Map<any, any>;
@@ -26,9 +36,17 @@ export class App {
             })
             this.client.on('data', (data: Buffer) => {
                 let str = data.toString()
-                console.log("raw incoming data", str)
+                // console.log("raw incoming data", str)
                 try {
-                    let msg = JSON.parse(str)
+                    let imsg = JSON.parse(str) as IncomingMessage
+                    if(imsg.trace) {
+                        log.info("tracing incoming message",imsg);
+                        // log.info("current is",Date.now());
+                        let diff = Date.now()*1000 - imsg.timestamp_usec
+                        log.info(`diff is ${diff} msec`)
+                    }
+                    let msg = imsg.command
+
                     if (msg.AppConnectResponse) {
                         this.id = msg.AppConnectResponse.app_id
                         if (this.cb) this.cb(msg)
@@ -43,10 +61,10 @@ export class App {
                         if (this._on_close_window_cb) this._on_close_window_cb({})
                         return
                     }
-                    console.warn("msg is", msg)
+                    log.warn("msg is", msg)
                     if (this.cb) this.cb(msg)
                 } catch (e) {
-                    console.log("error JSON parsing",e)
+                    log.error("error JSON parsing",e)
                 }
             })
         })
@@ -57,10 +75,12 @@ export class App {
         if(!src) src = "00000000-0000-0000-0000-000000000000";
         let msg = {
             source:src,
+            trace:false,
+            timestamp_usec:0,
             command:obj,
         }
         let str = JSON.stringify(msg)
-        // console.log('sending',str)
+        if(msg.trace) log.info('sending',str)
         this.client.write(str)
     }
 
