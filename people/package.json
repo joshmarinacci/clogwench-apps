@@ -6,7 +6,7 @@
   "type": "module",
   "dependencies": {
     "thneed-gfx": "^0.1.45",
-    "thneed-idealos-common": "^0.0.7"
+    "thneed-idealos-common": "^0.0.8"
   },
   "devDependencies": {
     "typescript": "^4.7.2",

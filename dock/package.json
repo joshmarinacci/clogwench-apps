@@ -7,7 +7,7 @@
   "dependencies": {
     "thneed-gfx": "0.1.46",
     "typescript": "^4.7.2",
-    "thneed-idealos-common": "^0.0.5"
+    "thneed-idealos-common": "^0.0.8"
   },
   "devDependencies": {
     "@types/node": "^17.0.44",
