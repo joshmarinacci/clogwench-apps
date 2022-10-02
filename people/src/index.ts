@@ -1,6 +1,5 @@
 import {
     ActionButton,
-    BaseParentView,
     COMMAND_ACTION,
     COMMAND_CHANGE, FillChildPanel,
     HBox,
@@ -8,11 +7,8 @@ import {
     LayerView,
     Rect,
     SelectList,
-    Size,
-    SurfaceContext,
     TextLine,
     VBox,
-    View,
 } from "thneed-gfx";
 import {App,ClogwenchWindowSurface, DBObj} from "thneed-idealos-common"
 import {ContactEditor} from "./contact_editor";
@@ -94,14 +90,6 @@ function start(surface: ClogwenchWindowSurface, app:App) {
     vbox.set_fill('#00ffdd')
     vbox.set_vflex(true)
 
-    //results list
-    //contact view
-        // first, last
-        // email, phone number
-    //add new contact
-    //edit existing contact
-    //delete existing contact
-
     let toolbar = new HBox()
     toolbar.set_name('toolbar')
     toolbar.set_hflex(true)
@@ -113,7 +101,6 @@ function start(surface: ClogwenchWindowSurface, app:App) {
     toolbar.add(search_line)
     search_line.set_pref_width(150)
     search_line.on(COMMAND_ACTION,async ()=>{
-        // console.log("enter in the search",search_line.text)
         let query = search_line.text
         let results:DBObj[] = await app.db_query([
             {kind:'equals',key:'type',value:'person-contact'},

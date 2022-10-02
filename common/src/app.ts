@@ -22,9 +22,7 @@ export class App {
     private cb:Callback
 
     constructor() {
-        // console.log("Making a socket")
         this.client = new Socket()
-        // console.log("made it")
         this.windows = new Map()
     }
 
@@ -85,11 +83,8 @@ export class App {
     }
 
     async send_and_wait(obj) {
-        // console.log("sending", obj)
         let prom = new Promise((res, rej) => {
-            // console.log('waiting')
             this.cb = (msg) => {
-                // console.log("callback completed", msg)
                 this.cb = null
                 res(msg)
             }
@@ -195,7 +190,7 @@ export class Window {
         this.bounds = info.bounds
         this.listeners = new Map<string, Callback>();
         this.buffer = new BufferImage(this.bounds.w,this.bounds.h)
-        this.buffered = true
+        this.buffered = false
     }
 
 

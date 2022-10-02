@@ -12,7 +12,7 @@ import {
     Callback,
     SpriteGlyph,
     StandardTextHeight,
-    BASE_FONT,
+    BASE_FONT, KeyboardEvent, KEYBOARD_DOWN,
 } from "thneed-gfx";
 import {Window} from "./app.js";
 
@@ -35,26 +35,23 @@ const BLUE = {r:255, g:0, b:0, a:255}
 const TRANSPARENT:Color = {r:255, g:0, b:255, a:0}
 
 export type IdealosKeyEvent = {
-    key:string
-    code:string
+    key:string,
+    mods: {
+        shift:boolean,
+        ctrl:boolean,
+        alt:boolean,
+        meta:boolean,
+    }
 }
 
-export function ideal_os_key_to_thneed_code(inp:IdealosKeyEvent):IdealosKeyEvent {
-    // console.log("converting idealos key event",inp)
-    let out:IdealosKeyEvent = {
-        code: "",
-        key: ""
+export function ideal_os_key_to_thneed_code(inp: IdealosKeyEvent, p: ClogwenchWindowSurface):KeyboardEvent {
+    console.log("converting idealos key event",inp)
+    let out:KeyboardEvent = new KeyboardEvent(p, KEYBOARD_DOWN);
+    if(IDEALOS_KEYBOARD_CODE[inp.key]) {
+        out.code = IDEALOS_KEYBOARD_CODE[inp.key]
     }
-    if(IDEALOS_KEYBOARD_CODE[inp.code]) {
-        out.code = IDEALOS_KEYBOARD_CODE[inp.code]
-    }
-    if(IDEALOS_KEYBOARD_KEY[out.code]) {
-        out.key = IDEALOS_KEYBOARD_KEY[out.code]
-    }
-    if(inp.key && inp.key !== '') {
-        out.key = inp.key
-    }
-    // console.log("to thneed event:",out)
+    out.modifiers = inp.mods
+    console.log("to thneed event:",out.key,out.code,out.modifiers)
     return out
 }
 
@@ -282,12 +279,9 @@ export class ClogwenchWindowSurface implements SurfaceContext {
             this.mouse.trigger_mouse_up(position, 0)
         })
         this.win.on('keydown',(evt) => {
-            let mod:Modifiers = {
-                alt: false, ctrl: false, meta: false, shift: false
-            }
-            //ArrowRight
-            let e = ideal_os_key_to_thneed_code(evt);
-            this.keyboard.trigger_key_down(e.key,e.code, mod)
+            this.log("got keydown",evt);
+            let e:KeyboardEvent = ideal_os_key_to_thneed_code(evt,this);
+            this.keyboard.trigger_key_down(e.key,e.code, e.modifiers)
         })
         this.win.on('resize',() => this.repaint())
         let name = 'base'
