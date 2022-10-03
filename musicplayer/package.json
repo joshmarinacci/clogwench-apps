@@ -4,8 +4,8 @@
   "main": "build/index.js",
   "type": "module",
   "dependencies": {
-    "thneed-gfx": "^0.1.46",
-    "thneed-idealos-common": "^0.0.7",
+    "thneed-gfx": "^0.1.47",
+    "thneed-idealos-common": "^0.0.9",
     "josh_js_util": "^0.0.9"
   },
   "devDependencies": {
@@ -14,7 +14,7 @@
   },
   "engineStrict": true,
   "scripts": {
-    "start": "node --experimental-specifier-resolution=node build/node.js",
+    "start": "node --experimental-specifier-resolution=node build/index.js",
     "build": "rm -rf build; tsc",
     "dev": "npm run build && npm run start"
   }

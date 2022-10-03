@@ -187,6 +187,10 @@ async function doit() {
     let win = await app.open_window(new Rect(200, 50, 500, 250))
     let surface = new ClogwenchWindowSurface(win);
     start(surface,app)
+    app.on_close_window(() => {
+        console.log("window closed. quitting")
+        process.exit(0)
+    })
 }
 
 doit().then(() => console.log("fully started")).catch((e) => console.error(e))
