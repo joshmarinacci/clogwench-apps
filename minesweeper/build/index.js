@@ -9,7 +9,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import { App, ClogwenchWindowSurface } from "thneed-idealos-common";
 import { BaseView, POINTER_DOWN, Size, LayerView, Rect, Point, } from "thneed-gfx";
-// import {GridModel} from "../../../common/models";
 import { make_logger } from "josh_js_util";
 let log = make_logger("minesweeper");
 class GridModel {
@@ -137,6 +136,8 @@ class MinesweeperModel {
         return count;
     }
 }
+const black = '#000000';
+const white = '#ffffff';
 class MinesweeperView extends BaseView {
     constructor(model) {
         super('minesweepr-view');
@@ -146,22 +147,17 @@ class MinesweeperView extends BaseView {
     }
     draw(g) {
         g.fillBackgroundSize(this.size(), '#000000');
-        this.model.grid.forEach((w, x, y) => {
+        this.model.grid.forEach((v, x, y) => {
             let r = new Rect(x * this.scale, y * this.scale, this.scale - 1, this.scale - 1);
-            //gray is uncovered empty
-            //red is still covered
-            //
             let color = '#cccccc';
-            if (w.mine)
+            if (v.mine)
                 color = '#000000';
-            if (w.covered)
+            if (v.covered)
                 color = '#ff0000';
             g.fill(r, color);
-            if (!w.covered) {
-                // g.ctx.fillStyle = 'black'
-                // g.ctx.fillText(`${w.adjacent}`, x * this.scale+8, y * this.scale+16)
+            if (!v.covered) {
                 let pos = new Point(x * this.scale + 6, y * this.scale + 16 + 8);
-                g.fillText(`${w.adjacent}`, pos, '#000000', 'base');
+                g.fillText(`${v.adjacent}`, pos, white, 'base');
             }
         });
         g.strokeBackgroundSize(this.size(), '#000000');
@@ -171,10 +167,10 @@ class MinesweeperView extends BaseView {
             let e = evt;
             let pt = e.position.divide_floor(this.scale);
             let cell = this.model.grid.get_at(pt);
-            console.log('cell is', cell);
+            // console.log('cell is',cell);
             if (cell.covered === true) {
                 cell.covered = false;
-                e.ctx.repaint();
+                // e.ctx.repaint()
             }
         }
     }
