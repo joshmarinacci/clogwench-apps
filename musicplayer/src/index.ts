@@ -7,7 +7,7 @@ import {
     SelectList,
     HSpacer,
     BaseView, Size, ScrollView, COMMAND_ACTION, COMMAND_CHANGE,
-    Rect,
+    Rect, FillChildPanel,
 } from "thneed-gfx";
 import {make_logger} from "josh_js_util"
 import {App, ClogwenchWindowSurface, DBObj} from "thneed-idealos-common";
@@ -87,14 +87,11 @@ function make_toolbar(player:MusicPlayer) {
 }
 
 export class MusicPlayer extends VBox {
-    private song_list: SelectList;
-    private artist_list: SelectList;
-    private album_list: SelectList;
     private _selected_track: DBObj;
     private app: App;
     private playing: boolean;
     private source: string;
-    private content_scroll: ScrollView;
+    private query_view: FillChildPanel;
 
     constructor(app: App) {
         super();
@@ -106,6 +103,7 @@ export class MusicPlayer extends VBox {
 
         let middle_layer = new HBox()
         middle_layer.set_vflex(true)
+        middle_layer.set_fill("#00ff00")
         middle_layer.set_name('middle')
         let sources = ['Artists','Albums','Songs']
         let source_list = new SelectList(sources,(v)=>v)
@@ -116,52 +114,24 @@ export class MusicPlayer extends VBox {
         source_scroll.set_vflex(true)
         middle_layer.add(source_scroll)
 
-        let test_song = {
-            id:"some-bad-id",
-            data: {
-                album:"foo",
-                title:"bar",
-                artist:"baz"
-            }
-        }
-        let rend = (obj) => {
-            return `${obj.data.title} - ${obj.data.artist}`
-        }
-        this.song_list = new SelectList([test_song],rend)
-        this.song_list.on(COMMAND_CHANGE,(e) => {
-            this.set_selected_track(e.item)
-        })
+        // this.song_list.on(COMMAND_CHANGE,(e) => {
+        //     this.set_selected_track(e.item)
+        // })
 
-        this.artist_list = new SelectList([],(s)=>s);
-        this.album_list = new SelectList([],(s)=>s);
-
-
-        this.content_scroll = new ScrollView();
-        this.content_scroll.set_content(new ActionButton())
-        this.content_scroll.set_pref_width(250)
-        this.content_scroll.set_vflex(true)
-        middle_layer.add(this.content_scroll)
+        this.query_view = new FillChildPanel()
+        this.query_view.set_hflex(true)
+        this.query_view.set_vflex(true)
+        let hb = new HBox()
+        hb.set_fill('#ff0000')
+        hb.set_vflex(true)
+        hb.set_hflex(true)
+        hb.add(new ActionButton())
+        this.query_view.set_child(hb)
+        middle_layer.add(this.query_view)
 
         this.add(middle_layer)
         this.add(make_statusbar());
-
-
-        source_list.on(COMMAND_CHANGE, (e)=>{
-            this.set_source(e.item)
-        })
-
-
-        setTimeout(async ()=>{
-            // console.log('fetching a database query')
-            try {
-                let tracks = await app.db_query([{kind:'equals',key:'type', value:'song-track'}])
-                this.set_tracks(tracks)
-                // surface.repaint()
-            } catch (e) {
-                console.error(e)
-            }
-        },500)
-
+        source_list.on(COMMAND_CHANGE, (e)=> this.set_source(e.item))
     }
 
     set_source(item: string) {
@@ -195,16 +165,73 @@ export class MusicPlayer extends VBox {
         }
     }
     set_tracks(tracks:SongTrack[]) {
-        this.song_list.set_data(tracks)
-        this.content_scroll.set_content(this.song_list)
+        let songs_list = new SelectList(tracks,(obj)=>`${obj.data.title} - ${obj.data.artist}`);
+        let songs_scroll = new ScrollView()
+        songs_scroll.set_content(songs_list)
+        songs_scroll.set_vflex(true)
+        songs_scroll.set_hflex(true)
+        this.query_view.set_child(songs_scroll)
     }
     set_artists(artists:string[]) {
-        this.artist_list.set_data(artists);
-        this.content_scroll.set_content(this.artist_list)
+        let hbox = new HBox()
+        hbox.set_vflex(true)
+
+        let artists_list = new SelectList(artists,(a)=>a);
+        let artists_scroll = new ScrollView()
+        artists_scroll.set_pref_width(150)
+        artists_scroll.set_content(artists_list)
+        artists_scroll.set_vflex(true)
+        hbox.add(artists_scroll)
+
+        let songs_list = new SelectList([],(obj)=>obj.data.title)
+        let songs_scroll = new ScrollView()
+        songs_scroll.set_pref_width(150)
+        songs_scroll.set_content(songs_list)
+        songs_scroll.set_vflex(true)
+        songs_scroll.set_hflex(true)
+        hbox.add(songs_scroll)
+
+        artists_list.on(COMMAND_CHANGE,(e)=>{
+            log.info("selected artist",e)
+            this.app.db_query([
+                {kind:'equals',key:'type', value:'song-track'},
+                {kind:'equals',key:'artist',value:e.item}
+            ]).then(res => {
+                log.info("got back results for artist",res)
+                songs_list.set_data(res)
+            })
+
+        })
+        this.query_view.set_child(hbox)
     }
     set_albums(albums:string[]) {
-        this.album_list.set_data(albums);
-        this.content_scroll.set_content(this.album_list)
+        let hbox = new HBox()
+        hbox.set_vflex(true)
+        let albums_list = new SelectList(albums,(a)=>a);
+        let albums_scroll = new ScrollView()
+        albums_scroll.set_pref_width(150)
+        albums_scroll.set_content(albums_list)
+        albums_scroll.set_vflex(true)
+        hbox.add(albums_scroll)
+
+        let songs_list = new SelectList([],(obj)=>obj.data.title)
+        let songs_scroll = new ScrollView()
+        songs_scroll.set_pref_width(150)
+        songs_scroll.set_content(songs_list)
+        songs_scroll.set_vflex(true)
+        songs_scroll.set_hflex(true)
+        hbox.add(songs_scroll)
+
+        albums_list.on(COMMAND_CHANGE, e => {
+            this.app.db_query([
+                {kind:'equals',key:'type', value:'song-track'},
+                {kind:'equals',key:'album',value:e.item}
+            ]).then(res => {
+                log.info("got back results for album",res)
+                songs_list.set_data(res)
+            })
+        })
+        this.query_view.set_child(hbox)
     }
 
     get_selected_track():DBObj {
@@ -265,7 +292,7 @@ async function doit() {
     let app = new App()
     await app.connect()
     await app.send_and_wait({AppConnect: {HelloApp: {}}})
-    let win = await app.open_window(new Rect(50, 50, 600, 300))
+    let win = await app.open_window(new Rect(50, 50, 500, 250))
     let surface = new ClogwenchWindowSurface(win);
     start(app,surface)
     app.on_close_window(() => {
