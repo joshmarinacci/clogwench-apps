@@ -30,6 +30,10 @@ class GridModel {
     }
 
     get_xy(x: number, y: number): any {
+        if(x < 0) return null
+        if(y < 0) return null
+        if(x >= this.w) return null
+        if(y >= this.h) return null
         let n = this.xy_to_n(x, y);
         return this.data[n]
     }
@@ -159,6 +163,20 @@ class MinesweeperModel {
         }
         return count
     }
+
+    reveal_at(pt:Point) {
+        let cell = this.grid.get_at(pt);
+        if (cell && cell.covered === true) {
+            cell.covered = false;
+            if(cell.adjacent === 0) {
+                this.reveal_at(pt.add(new Point(-1, 0))) // left
+                this.reveal_at(pt.add(new Point( 1, 0))) // right
+                this.reveal_at(pt.add(new Point( 0,-1))) // up
+                this.reveal_at(pt.add(new Point( 0, 1))) // down
+            }
+        }
+
+    }
 }
 
 const black = '#000000'
@@ -192,12 +210,7 @@ class MinesweeperView extends BaseView {
         if(evt.type === POINTER_DOWN) {
             let e = evt as PointerEvent
             let pt = e.position.divide_floor(this.scale);
-            let cell = this.model.grid.get_at(pt);
-            // console.log('cell is',cell);
-            if (cell.covered === true) {
-                cell.covered = false;
-                // e.ctx.repaint()
-            }
+            this.model.reveal_at(pt);
         }
     }
 
