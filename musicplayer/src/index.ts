@@ -7,7 +7,7 @@ import {
     SelectList,
     HSpacer,
     BaseView, Size, ScrollView, COMMAND_ACTION, COMMAND_CHANGE,
-    Rect, FillChildPanel,
+    Rect, FillChildPanel, Point,
 } from "thneed-gfx";
 import {make_logger} from "josh_js_util"
 import {App, ClogwenchWindowSurface, DBObj} from "thneed-idealos-common";
@@ -34,24 +34,52 @@ function make_statusbar() {
 }
 
 
+const DUMMY_TRACK:SongTrack = {
+    data: {
+        album: "nowhere",
+        artist: "nobody",
+        mimetype: "",
+        title: "---",
+        type: "song-track"},
+    deleted: false,
+    id: "nothing"
+
+}
 class LCDView extends BaseView {
+    private track: SongTrack;
     constructor() {
         super("lcd-view");
         this._name = 'lcd-view'
+        this.track = DUMMY_TRACK;
     }
     draw(g: SurfaceContext): void {
         g.fillBackgroundSize(this.size(),'#cccccc')
-        let text = 'LCD View'
-        let size = g.measureText(text,'base')
-        let x = (this.size().w - size.w)/2
-        let y = (this.size().h - size.h)/2
-        // g.fillRect(x,y,size.w,size.h,'aqua')
-        g.fillStandardText(text,x,y+size.h,'base')
+        const center = (text) => {
+            let size = g.measureText(text,'base')
+            let x = (this.size().w - size.w)/2
+            let y = (this.size().h - size.h)/2
+            return new Point(x,y)
+        }
+        const draw_centered= (text,yoff) => {
+            let pt = center(text)
+            g.fillText(text, pt.add(new Point(0,yoff)),'black')
+        }
+        draw_centered(this.track.data.title,-2)
+        draw_centered(this.track.data.artist,15)
+        draw_centered(this.track.data.album,30)
+
+        let text = "paused"
+        g.fillText(text, new Point(10,20),'black')
     }
 
     layout(g: SurfaceContext, available: Size): Size {
         this.set_size(new Size(200,60))
         return this.size()
+    }
+
+    set_current_track(track: SongTrack) {
+        console.log('set track to',track);
+        this.track = track;
     }
 }
 
@@ -82,7 +110,11 @@ function make_toolbar(player:MusicPlayer) {
     hbox.add(next)
 
     hbox.add(new HSpacer())
-    hbox.add(new LCDView())
+    let lcd = new LCDView()
+    player.on("selected-track",(track:SongTrack) => {
+        lcd.set_current_track(track)
+    })
+    hbox.add(lcd)
     return hbox
 }
 
@@ -170,6 +202,9 @@ export class MusicPlayer extends VBox {
         songs_scroll.set_content(songs_list)
         songs_scroll.set_vflex(true)
         songs_scroll.set_hflex(true)
+        songs_list.on(COMMAND_CHANGE,e => {
+            this.set_selected_track(e.item)
+        })
         this.query_view.set_child(songs_scroll)
     }
     set_artists(artists:string[]) {
@@ -202,6 +237,10 @@ export class MusicPlayer extends VBox {
             })
 
         })
+        songs_list.on(COMMAND_CHANGE,e => {
+            this.set_selected_track(e.item)
+        })
+
         this.query_view.set_child(hbox)
     }
     set_albums(albums:string[]) {
@@ -230,6 +269,9 @@ export class MusicPlayer extends VBox {
                 log.info("got back results for album",res)
                 songs_list.set_data(res)
             })
+        })
+        songs_list.on(COMMAND_CHANGE,e => {
+            this.set_selected_track(e.item)
         })
         this.query_view.set_child(hbox)
     }
@@ -266,6 +308,7 @@ export class MusicPlayer extends VBox {
 
     private set_selected_track(item) {
         this._selected_track = item;
+        this.fire("selected-track",this._selected_track)
     }
 
     is_playing() {
