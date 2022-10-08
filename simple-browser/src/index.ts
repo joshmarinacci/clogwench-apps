@@ -72,7 +72,7 @@ let DOC:Paragraph[] = [
     }
 ]
 
-const SAMPLE_HTML = `<html><p>hello</p><p>goodbye</p></html>`
+const SAMPLE_HTML = `<html><p>hello</p>cool<p>goodbye</p></html>`
 
 function make_main_view(surface:ClogwenchWindowSurface, app:App):View {
     let scroll = new ScrollView();

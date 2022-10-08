@@ -1,6 +1,5 @@
 import raw_grammar from "./parser.ohm.js"
 import ohm from "ohm-js"
-import {deepEqual} from "assert";
 import {BlockStyle, Paragraph, TextRun, TextStyle} from "./richtext";
 
 class Loggo {
@@ -143,11 +142,10 @@ export function parse_html(input):Paragraph[] {
     }
 
     L.print("input is",input)
-    input = "<html><p>hello</p><p>goodbye</p></html>"
     let res1 = grammar.match(input)
     if (res1.failed()) throw new Error("match failed")
     let tokens:Token[] = semantics(res1).ast()
-    // L.print("tokens",tokens)
+    L.print("tokens",tokens)
     let root = to_elements(tokens)
     L.inspect(root)
 
@@ -159,28 +157,25 @@ export function parse_html(input):Paragraph[] {
     }
     let block_plain:BlockStyle = {
         background_color: "#ffffff",
-        border_width: 0,
+        border_width: 1,
         border_color: "#000000",
         padding_width: 5,
     }
 
     let ch:Element = (root as Element).children[0] as Element
-    console.log('real root',ch)
+    // console.log('real root',ch)
+
+    const to_TextRun = (txt:TextNode):TextRun => ({ style: plain, text: txt.text })
     return ch.children.map(ch => {
-        console.log("ch is",ch)
-        let che = ch as Element
-        let runs = che.children.map(text => {
-            console.log("run is",text)
-            let txt:TextNode = text as TextNode
-            let run:TextRun = {
-                style: plain,
-                text: txt.text
-            }
-            return run
-        })
         let p:Paragraph = {
-            runs: runs,
-            style: block_plain,
+            runs:[],
+            style:block_plain,
+        }
+        if(ch.type === 'element') {
+            p.runs = (ch as Element).children.map(text => to_TextRun(text as TextNode))
+        }
+        if(ch.type === 'text') {
+            p.runs = [to_TextRun(ch as TextNode)]
         }
         return p
     })
