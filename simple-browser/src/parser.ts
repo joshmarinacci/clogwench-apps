@@ -171,11 +171,13 @@ export function parse_html(input):Paragraph[] {
             runs:[],
             style:block_plain,
         }
-        if(ch.type === 'element') {
-            p.runs = (ch as Element).children.map(text => to_TextRun(text as TextNode))
-        }
-        if(ch.type === 'text') {
-            p.runs = [to_TextRun(ch as TextNode)]
+        switch (ch.type) {
+            case "element":
+                p.runs = (ch as Element).children.map(text => to_TextRun(text as TextNode))
+                break
+            case "text":
+                p.runs = [to_TextRun(ch as TextNode)]
+                break
         }
         return p
     })
