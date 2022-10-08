@@ -72,24 +72,24 @@ let DOC:Paragraph[] = [
     }
 ]
 
+const SAMPLE_HTML = `<html><p>hello</p><p>goodbye</p></html>`
 
 function make_main_view(surface:ClogwenchWindowSurface, app:App):View {
     let scroll = new ScrollView();
     scroll.set_hflex(true)
     scroll.set_vflex(true)
-    scroll.set_content(with_props(new RichTextArea(), {doc:DOC}))
+    let ra = new RichTextArea()
+    ra.set_doc(parse_html(SAMPLE_HTML))
+    scroll.set_content(ra)
     return scroll
 }
 
-const SAMPLE_HTML = `<html><p>hello</p><p>goodbye</p></html>`
 
 function start(app: App, surface: ClogwenchWindowSurface) {
     let app_root = make_main_view(surface, app);
     surface.set_root(app_root)
     surface.start_input()
     surface.repaint()
-
-    parse_html(SAMPLE_HTML)
 }
 
 

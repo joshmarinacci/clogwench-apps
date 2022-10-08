@@ -1,6 +1,7 @@
 import raw_grammar from "./parser.ohm.js"
 import ohm from "ohm-js"
 import {deepEqual} from "assert";
+import {BlockStyle, Paragraph, TextRun, TextStyle} from "./richtext";
 
 class Loggo {
     private depth: number;
@@ -37,7 +38,7 @@ class Loggo {
     }
 }
 
-export function parse_html(input) {
+export function parse_html(input):Paragraph[] {
     const L = new Loggo()
 
     type Open = {
@@ -149,5 +150,39 @@ export function parse_html(input) {
     // L.print("tokens",tokens)
     let root = to_elements(tokens)
     L.inspect(root)
+
+    let plain:TextStyle = {
+        font: "base",
+        underline: false,
+        color:'#000000',
+        weight:'plain'
+    }
+    let block_plain:BlockStyle = {
+        background_color: "#ffffff",
+        border_width: 0,
+        border_color: "#000000",
+        padding_width: 5,
+    }
+
+    let ch:Element = (root as Element).children[0] as Element
+    console.log('real root',ch)
+    return ch.children.map(ch => {
+        console.log("ch is",ch)
+        let che = ch as Element
+        let runs = che.children.map(text => {
+            console.log("run is",text)
+            let txt:TextNode = text as TextNode
+            let run:TextRun = {
+                style: plain,
+                text: txt.text
+            }
+            return run
+        })
+        let p:Paragraph = {
+            runs: runs,
+            style: block_plain,
+        }
+        return p
+    })
 }
 

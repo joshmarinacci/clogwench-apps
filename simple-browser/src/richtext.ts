@@ -19,7 +19,7 @@ export type BlockStyle = {
     padding_width: number,
 }
 
-type TextRun = {
+export type TextRun = {
     text: string,
     style: TextStyle,
 }
