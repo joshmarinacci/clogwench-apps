@@ -37,6 +37,37 @@ class Loggo {
     }
 }
 
+
+
+let plain:TextStyle = {
+    font: "base",
+    underline: false,
+    color:'#000000',
+    weight:'plain'
+}
+let block_plain:BlockStyle = {
+    background_color: "#ffffff",
+    border_width: 0,
+    border_color: "#000000",
+    padding_width: 5,
+}
+let block_header:BlockStyle = {
+    background_color:"#00ff66",
+    border_width:0,
+    border_color: "#000000",
+    padding_width: 5,
+}
+
+
+const STYLE_LOOKUP = {
+    "h1":block_header
+}
+
+function lookup_style(name: string) {
+    if(STYLE_LOOKUP[name]) return STYLE_LOOKUP[name]
+    return block_plain
+}
+
 export function parse_html(input):Paragraph[] {
     const L = new Loggo()
 
@@ -145,27 +176,14 @@ export function parse_html(input):Paragraph[] {
     let res1 = grammar.match(input)
     if (res1.failed()) throw new Error("match failed")
     let tokens:Token[] = semantics(res1).ast()
-    L.print("tokens",tokens)
+    // L.print("tokens",tokens)
     let root = to_elements(tokens)
-    L.inspect(root)
-
-    let plain:TextStyle = {
-        font: "base",
-        underline: false,
-        color:'#000000',
-        weight:'plain'
-    }
-    let block_plain:BlockStyle = {
-        background_color: "#ffffff",
-        border_width: 1,
-        border_color: "#000000",
-        padding_width: 5,
-    }
+    // L.inspect(root)
 
     let ch:Element = (root as Element).children[0] as Element
-    // console.log('real root',ch)
+    L.inspect(ch)
 
-    const to_TextRun = (txt:TextNode):TextRun => ({ style: plain, text: txt.text })
+    const to_TextRun = (txt:TextNode):TextRun => ({ style: plain, text: txt.text.trim() })
     return ch.children.map(ch => {
         let p:Paragraph = {
             runs:[],
@@ -173,7 +191,9 @@ export function parse_html(input):Paragraph[] {
         }
         switch (ch.type) {
             case "element":
-                p.runs = (ch as Element).children.map(text => to_TextRun(text as TextNode))
+                let el = ch as Element
+                p.runs = el.children.map(text => to_TextRun(text as TextNode))
+                p.style = lookup_style(el.name)
                 break
             case "text":
                 p.runs = [to_TextRun(ch as TextNode)]

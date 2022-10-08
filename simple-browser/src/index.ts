@@ -6,73 +6,41 @@ import {App,ClogwenchWindowSurface} from "thneed-idealos-common"
 import {BlockStyle, Paragraph, RichTextArea, TextStyle} from "./richtext";
 import {parse_html} from "./parser";
 
-let plain:TextStyle = {
-    font: "base",
-    underline: false,
-    color:'#000000',
-    weight:'plain'
-}
-let link:TextStyle = {
-    font:"base",
-    underline: true,
-    color: '#0000ff',
-    weight:'plain',
-}
-let bold:TextStyle = {
-    font: "base",
-    underline: false,
-    color:'#000000',
-    weight:'bold'
-}
-let block_plain:BlockStyle = {
-    background_color: "#ffffff",
-    border_width: 0,
-    border_color: "#000000",
-    padding_width: 5,
-}
-let block_header:BlockStyle = {
-    background_color: '#00ffff',
-    border_width: 1,
-    border_color: "#444444",
-    padding_width: 10
-}
-let DOC:Paragraph[] = [
-    {
-        runs:[
-            {
-                text:"This is some very cool and long text to read that will definitely need to be wrapped.",
-                style: plain,
-            },
-            {
-                text:"And this is some more text to read, now in BOLD!",
-                style: bold
-            },
-        ],
-        style: block_plain,
-    },
-    {
-        runs:[
-            {
-                text:"In the second paragraph.", style: plain
-            },
-            {
-                text: "Text can be underlined too.", style: link
-            }
-        ],
-        style: block_plain,
-    },
-    {
-        runs:[
-            {
-                text:"Third paragraph just has a single run of text in it but has a block header style",
-                style: plain
-            }
-        ],
-        style: block_header,
-    }
-]
+// let plain:TextStyle = {
+//     font: "base",
+//     underline: false,
+//     color:'#000000',
+//     weight:'plain'
+// }
+// let link:TextStyle = {
+//     font:"base",
+//     underline: true,
+//     color: '#0000ff',
+//     weight:'plain',
+// }
+// let bold:TextStyle = {
+//     font: "base",
+//     underline: false,
+//     color:'#000000',
+//     weight:'bold'
+// }
+// let block_plain:BlockStyle = {
+//     background_color: "#ffffff",
+//     border_width: 0,
+//     border_color: "#000000",
+//     padding_width: 5,
+// }
+// let block_header:BlockStyle = {
+//     background_color: '#00ffff',
+//     border_width: 1,
+//     border_color: "#444444",
+//     padding_width: 10
+// }
 
-const SAMPLE_HTML = `<html><p>hello</p>cool<p>goodbye</p></html>`
+const SAMPLE_HTML = `<html>
+<h1>Welcome My Son</h1>
+<p>Welcome to the machine!</p>
+</html>`
 
 function make_main_view(surface:ClogwenchWindowSurface, app:App):View {
     let scroll = new ScrollView();
