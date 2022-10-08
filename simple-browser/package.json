@@ -5,6 +5,7 @@
   "module": "build/index.js",
   "type": "module",
   "dependencies": {
+    "ohm-js": "^16.4.0",
     "thneed-gfx": "^0.1.47",
     "thneed-idealos-common": "^0.0.9"
   },

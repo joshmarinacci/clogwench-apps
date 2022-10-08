@@ -1,10 +1,10 @@
 import {
-    ActionButton,
     Rect, ScrollView,
     View, with_props,
 } from "thneed-gfx";
 import {App,ClogwenchWindowSurface} from "thneed-idealos-common"
 import {BlockStyle, Paragraph, RichTextArea, TextStyle} from "./richtext";
+import {parse_html} from "./parser";
 
 let plain:TextStyle = {
     font: "base",
@@ -81,11 +81,15 @@ function make_main_view(surface:ClogwenchWindowSurface, app:App):View {
     return scroll
 }
 
+const SAMPLE_HTML = `<html><p>hello</p><p>goodbye</p></html>`
+
 function start(app: App, surface: ClogwenchWindowSurface) {
-    let music_root = make_main_view(surface, app);
-    surface.set_root(music_root)
+    let app_root = make_main_view(surface, app);
+    surface.set_root(app_root)
     surface.start_input()
     surface.repaint()
+
+    parse_html(SAMPLE_HTML)
 }
 
 
