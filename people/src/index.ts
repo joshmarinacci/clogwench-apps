@@ -11,7 +11,7 @@ import {
     VBox,
 } from "thneed-gfx";
 import {App,ClogwenchWindowSurface, DBObj} from "thneed-idealos-common"
-import {ContactEditor} from "./contact_editor";
+import {ContactEditor} from "./contact_editor.js";
 
 class ContactView extends VBox {
     private first: Label;

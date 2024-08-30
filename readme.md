@@ -6,7 +6,7 @@ To install and build all the apps do:
 
 ```shell
 npm install
-npm run build.js full-clean
-npm run build.js install
-npm run build.js build
+node build.js full-clean
+node build.js install
+node build.js build
 ```

@@ -3,8 +3,8 @@ import {
     View, with_props,
 } from "thneed-gfx";
 import {App,ClogwenchWindowSurface} from "thneed-idealos-common"
-import {BlockStyle, Paragraph, RichTextArea, TextStyle} from "./richtext";
-import {parse_html} from "./parser";
+import {BlockStyle, Paragraph, RichTextArea, TextStyle} from "./richtext.js";
+import {parse_html} from "./parser.js";
 
 // let plain:TextStyle = {
 //     font: "base",

@@ -14,7 +14,7 @@ function execit(dir,cmd) {
         },(e,so,se)=>{
             // log.info("callback",e,so,se)
             if(e) {
-                log.info("error",e,se)
+                log.info(`error in ${dir}`,e,se)
                 rej(e)
             } else {
                 res(so)
@@ -34,7 +34,7 @@ async function do_command(dir, command) {
     }
     if(command === 'build') {
         let output = await execit(dir,`npm run build`)
-        log.info("coutput is",output)
+        log.info(output)
     }
 
 }
@@ -43,7 +43,7 @@ function print_help() {
     console.log("node doall <command>")
     console.log("   available commands")
     console.log("   full-clean")
-
+    console.log("   build")
 }
 
 

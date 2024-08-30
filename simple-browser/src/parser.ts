@@ -1,6 +1,6 @@
 import raw_grammar from "./parser.ohm.js"
-import ohm from "ohm-js"
-import {BlockStyle, Paragraph, TextRun, TextStyle} from "./richtext";
+import {grammar as Grammar} from "ohm-js"
+import {BlockStyle, Paragraph, TextRun, TextStyle} from "./richtext.js";
 
 class Loggo {
     private depth: number;
@@ -96,7 +96,7 @@ export function parse_html(input):Paragraph[] {
         return obj
     }
 
-    let grammar = ohm.grammar(raw_grammar)
+    let grammar = Grammar(raw_grammar)
     let semantics = grammar.createSemantics()
     semantics.addOperation('ast', {
         _terminal() { return this.sourceString },

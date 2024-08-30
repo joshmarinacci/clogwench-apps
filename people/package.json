@@ -1,20 +1,23 @@
 {
   "name": "people",
   "version": "0.0.1",
-  "main": "build/index.js",
-  "module": "build/index.js",
+  "main": "dist/index.js",
+  "module": "dist/module.js",
   "type": "module",
   "dependencies": {
     "thneed-gfx": "^0.1.47",
-    "thneed-idealos-common": "^0.0.9"
+    "thneed-idealos-common": "file:../common"
   },
   "devDependencies": {
-    "typescript": "^4.7.2",
-    "@types/node": "^17.0.44"
+    "@types/node": "^17.0.44",
+    "esbuild": "^0.23.1",
+    "typescript": "^4.7.2"
   },
   "scripts": {
-    "start": "node --experimental-specifier-resolution=node build/index.js",
-    "build": "rm -rf build; tsc",
-    "dev": "npm run build && npm run start"
+    "start": "node build/index.js",
+    "clean": "rm -rf ./build && mkdir -p build",
+    "build": "esbuild src/*.ts  --outdir=build --platform=node",
+    "tsc": "tsc",
+    "dev": "npm run clean && npm run build && npm run start"
   }
 }

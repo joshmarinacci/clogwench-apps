@@ -1,13 +1,21 @@
 {
   "compilerOptions": {
-    "outDir": "build",
     "allowJs": false,
-    "lib": ["es2015", "dom"],
-    "target": "es2015",
+    "esModuleInterop": true,
+    "lib": [
+      "es2015",
+      "dom"
+    ],
+    "module": "ES2015",
     "moduleResolution": "node",
+    "outDir": "build",
     "resolveJsonModule": true,
-    "esModuleInterop": true
+    "strict": true,
+    "target": "ES2020",
   },
+  "exclude": [
+    "node_modules"
+  ],
   "include": [
     "src/*.ts"
   ]
