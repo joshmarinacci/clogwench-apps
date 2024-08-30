@@ -1,6 +1,6 @@
 import {Socket} from "net";
 import {Rect, Size, Callback} from "thneed-gfx";
-import {BufferImage} from "./surface";
+import {BufferImage, Color} from "./surface.js";
 import {make_logger} from "josh_js_util";
 
 let log = make_logger("APP")
@@ -17,9 +17,11 @@ type IncomingMessage = {
 export class App {
     private client: Socket
     private windows: Map<any, any>;
+    // @ts-ignore
     public id: string;
+    // @ts-ignore
     private _on_close_window_cb: Callback;
-    private cb:Callback
+    private cb:Callback | undefined
 
     constructor() {
         this.client = new Socket()
@@ -68,7 +70,7 @@ export class App {
         })
     }
 
-    send(obj) {
+    send(obj:any) {
         let src = this.id
         if(!src) src = "00000000-0000-0000-0000-000000000000";
         let msg = {
@@ -82,10 +84,10 @@ export class App {
         this.client.write(str)
     }
 
-    async send_and_wait(obj) {
+    async send_and_wait(obj:any) {
         let prom = new Promise((res, rej) => {
             this.cb = (msg) => {
-                this.cb = null
+                this.cb = undefined
                 res(msg)
             }
         })
@@ -93,7 +95,7 @@ export class App {
         return prom
     }
 
-    async open_window(rect) {
+    async open_window(rect:Rect) {
         let opened_window = await this.send_and_wait({
             OpenWindowCommand: {
                 window_type: "plain",
@@ -178,23 +180,23 @@ export class Window {
     private app_id: string;
     private window_type: string;
     private app: App;
-    private listeners: Map<string, Callback>;
+    private listeners: Map<string, Callback[]>;
     private buffer: BufferImage;
     private buffered: boolean;
 
-    constructor(app, info) {
+    constructor(app:App, info:any) {
         this.app = app
         this.app_id = info.app_id
         this.window_id = info.window_id
         this.window_type = info.window_type
         this.bounds = info.bounds
-        this.listeners = new Map<string, Callback>();
+        this.listeners = new Map<string, Callback[]>();
         this.buffer = new BufferImage(this.bounds.w,this.bounds.h)
         this.buffered = false
     }
 
 
-    draw_rect(rect:Rect, color) {
+    draw_rect(rect:Rect, color:Color) {
         if(this.buffered) {
             this.buffer.draw_rect(rect, color)
         } else {
@@ -236,11 +238,10 @@ export class Window {
     }
 
     on(type:string, cb:Callback) {
-        if (!this.listeners[type]) this.listeners[type] = []
-        this.listeners[type].push(cb)
+        this._get_listeners(type).push(cb)
     }
 
-    dispatch(obj) {
+    dispatch(obj:any) {
         // console.log("window got event", obj)
         if (obj.MouseDown) this.fire('mousedown', obj.MouseDown)
         if (obj.MouseMove) this.fire('mousemove', obj.MouseUp)
@@ -249,10 +250,9 @@ export class Window {
         if (obj.WindowResized) this.set_size(obj.WindowResized.size)
     }
 
-    fire(type:string, obj) {
+    fire(type:string, obj:any) {
         // console.log("firing", type)
-        if (!this.listeners[type]) this.listeners[type] = []
-        this.listeners[type].forEach(cb => cb(obj))
+        this._get_listeners(type).forEach(cb => cb(obj))
     }
 
     close() {
@@ -286,6 +286,13 @@ export class Window {
         this.bounds.h = size.h
         this.buffer = new BufferImage(size.w,size.h)
         this.fire('resize',this)
+    }
+
+    private _get_listeners(type: string):Callback[] {
+        if (!this.listeners.has(type)) {
+            this.listeners.set(type,[])
+        }
+        return this.listeners.get(type) as Callback[]
     }
 }
 

@@ -10,16 +10,19 @@
     "build/*"
   ],
   "scripts": {
-    "build": "rm -rf build; tsc",
-    "clean": "rm -rf build",
-    "full-clean": "rm -rf node_modules && rm -rf build"
+    "clean": "rm -rf ./build; mkdir -p build",
+    "build": "esbuild src/*.ts  --outdir=build --platform=node",
+    "tsc": "tsc",
+    "build-full": "npm run clean && npm run build && npm run tsc",
+    "dev": "npm run build-full && node build/index.js"
   },
   "dependencies": {
-    "thneed-gfx": "^0.1.42"
+    "thneed-gfx": "^0.1.47"
   },
   "devDependencies": {
     "@types/node": "^17.0.44",
-    "typescript": "^4.8.3"
+    "typescript": "^4.8.3",
+    "esbuild": "^0.23.1"
   },
   "author": "",
   "license": "ISC"

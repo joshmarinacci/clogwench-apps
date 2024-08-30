@@ -19,7 +19,7 @@ import {Window} from "./app.js";
 
 import {IDEALOS_KEYBOARD_CODE, IDEALOS_KEYBOARD_KEY} from "./generated.js";
 
-type Color = {
+export type Color = {
     r:number,
     g:number,
     b:number,
@@ -46,9 +46,11 @@ export type IdealosKeyEvent = {
 
 export function ideal_os_key_to_thneed_code(inp: IdealosKeyEvent, p: ClogwenchWindowSurface):KeyboardEvent {
     console.log("converting idealos key event",inp)
-    let out:KeyboardEvent = new KeyboardEvent(p, KEYBOARD_DOWN);
+    let out:KeyboardEvent = new KeyboardEvent(p as SurfaceContext, KEYBOARD_DOWN);
+    // @ts-ignore
     if(IDEALOS_KEYBOARD_CODE[inp.key]) {
-        out.code = IDEALOS_KEYBOARD_CODE[inp.key]
+        // @ts-ignore
+        out.code = IDEALOS_KEYBOARD_CODE[inp.key] as unknown as string
     }
     out.modifiers = inp.mods
     console.log("to thneed event:",out.key,out.code,out.modifiers)
@@ -136,7 +138,7 @@ export class BufferFont {
     private data: any;
     private metas:Map<number,BufferGlyph>;
     private scale = 1;
-    constructor(data) {
+    constructor(data:any) {
         this.data = data
         this.metas = new Map();
         this.data.glyphs.forEach((gl:BufferGlyph) => {
@@ -144,13 +146,13 @@ export class BufferFont {
             this.metas.set(gl.meta.codepoint,gl)
         })
     }
-    measureText(text) {
+    measureText(text:string) {
         let xoff = 0
         let h = 0
         for(let i=0; i<text.length; i++) {
             let cp = text.codePointAt(i)
-            if(this.metas.has(cp)) {
-                let glyph = this.metas.get(cp)
+            if(cp && this.metas.has(cp)) {
+                let glyph = this.metas.get(cp) as BufferGlyph
                 let sw = glyph.w - glyph.meta.left - glyph.meta.right
                 xoff += sw + 1
                 h = Math.max(h,glyph.h)
@@ -173,8 +175,8 @@ export class BufferFont {
         for (let i = 0; i < text.length; i++) {
             let cp = text.codePointAt(i)
             let dx = x + xoff*this.scale*scale
-            if (this.metas.has(cp)) {
-                let glyph = this.metas.get(cp)
+            if (cp && this.metas.has(cp)) {
+                let glyph = this.metas.get(cp) as BufferGlyph
                 let sx = glyph.meta.left
                 let sy = 0
                 let sw = glyph.w - glyph.meta.left - glyph.meta.right
@@ -183,6 +185,7 @@ export class BufferFont {
                 let dw = sw*this.scale*scale
                 let dh = sh*this.scale*scale
                 let r = new Rect(dx,dy,dw,dh)
+                // @ts-ignore
                 win.draw_image(r, glyph.img)
                 xoff += sw + 1
             } else {
@@ -203,7 +206,7 @@ export class BufferFont {
         let yoff = 2
         if(this.metas.has(cp)) {
             // this.log("have glyph",cp)
-            let glyph = this.metas.get(cp)
+            let glyph = this.metas.get(cp) as BufferGlyph
             // this.log(glyph)
             // this.log(xoff, x, this.scale, scale)
             // ctx.imageSmoothingEnabled = false
@@ -244,7 +247,7 @@ export class BufferFont {
         }
     }
 
-    private log(...args) {
+    private log(...args:any[]) {
         console.log("BufferFont:", ...args)
     }
 }
@@ -252,17 +255,17 @@ export class ClogwenchWindowSurface implements SurfaceContext {
     private win: Window
     private mouse: MouseInputService
     private keyboard: KeyboardInputService
-    private _root: View
+    private _root: View | undefined
     private translation: Point;
     private font: BufferFont;
-    private _keyboard_focus: View|null;
-    protected _input_callback: Callback;
+    private _keyboard_focus: View|undefined;
+    protected _input_callback: Callback | undefined;
 
-    constructor(win) {
+    constructor(win:Window) {
         this.win = win
         this.translation = new Point(0,0)
-        this.mouse = new MouseInputService(this)
-        this.keyboard = new KeyboardInputService(this)
+        this.mouse = new MouseInputService(this as SurfaceContext)
+        this.keyboard = new KeyboardInputService(this as SurfaceContext)
         this.win.on('mousedown', (e) => {
             // console.log("got a mouse up event", e)
             let position = new Point(e.x, e.y)
@@ -333,7 +336,7 @@ export class ClogwenchWindowSurface implements SurfaceContext {
     }
 
     keyboard_focus(): View {
-        return this._keyboard_focus
+        return this._keyboard_focus as View
     }
 
     set_keyboard_focus(view: View) {
@@ -345,8 +348,7 @@ export class ClogwenchWindowSurface implements SurfaceContext {
     }
 
     release_keyboard_focus(view: View) {
-        this._keyboard_focus = null
-        // throw new Error("Method release_keyboard_focus() not implemented.");
+        this._keyboard_focus = undefined
     }
 
     view_to_local(pt: Point, view: View): Point {
@@ -358,10 +360,10 @@ export class ClogwenchWindowSurface implements SurfaceContext {
     }
 
     root() {
-        return this._root
+        return this._root as View
     }
 
-    set_root(button) {
+    set_root(button:View) {
         this._root = button
     }
 
@@ -395,12 +397,12 @@ export class ClogwenchWindowSurface implements SurfaceContext {
         } else {
             let available_size = new Size(this.win.bounds.w, this.win.bounds.h)
             // this.log("layout_stack with size", available_size)
-            let size = this._root.layout(this, available_size)
+            let size = this._root.layout(this as SurfaceContext, available_size)
             // console.log("canvas, root requested", size)
         }
     }
 
-    measureText(caption, font_name) {
+    measureText(caption:string, font_name:string) {
         return this.font.measureText(caption)
     }
 
@@ -412,7 +414,7 @@ export class ClogwenchWindowSurface implements SurfaceContext {
         this.win.draw_rect(rect,c)
     }
 
-    strokeBackgroundSize(size, color) {
+    strokeBackgroundSize(size:Size, color:string) {
         let c = this.hexstring_to_color(color)
         let rect = new Rect(0,0,size.w,size.h)
         rect.add_position(this.translation)
@@ -422,7 +424,7 @@ export class ClogwenchWindowSurface implements SurfaceContext {
         this.win.draw_rect(new Rect(rect.x+rect.w-1,rect.y,1,rect.h),c)
     }
 
-    fillText(caption, ptx, color) {
+    fillText(caption:string, ptx:Point, color:string) {
         let c = this.hexstring_to_color(color)
         // this.log("filling text",caption,ptx,c)
         let pt = ptx.add(this.translation)
@@ -434,13 +436,14 @@ export class ClogwenchWindowSurface implements SurfaceContext {
         if (this._root) this.draw_view(this._root)
     }
 
-    draw_view(view) {
+    draw_view(view:View) {
         // this.log("drawing view", view.name(), view.position(), view.size())
         let pos = view.position()
         this.translate(pos)
         if (view.visible()) {
             view.draw(this);
         }
+        // @ts-ignore
         if (view.is_parent_view && view.is_parent_view() && view.visible()) {
             let parent = view as unknown as ParentView;
             parent.get_children().forEach(ch => {
@@ -450,7 +453,7 @@ export class ClogwenchWindowSurface implements SurfaceContext {
         this.untranslate(pos)
     }
 
-    log(...args) {
+    log(...args:any[]) {
         console.log(...args)
     }
 
