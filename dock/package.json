@@ -5,17 +5,19 @@
   "module": "dist/module.js",
   "type": "module",
   "dependencies": {
-    "thneed-gfx": "0.1.46",
-    "typescript": "^4.7.2",
-    "thneed-idealos-common": "^0.0.8"
+    "thneed-gfx": "^0.1.47",
+    "thneed-idealos-common": "file:../common"
   },
   "devDependencies": {
     "@types/node": "^17.0.44",
-    "process": "^0.11.10"
+    "esbuild": "^0.23.1",
+    "process": "^0.11.10",
+    "typescript": "^4.7.2"
   },
   "scripts": {
-    "start": "node --experimental-specifier-resolution=node build/index.js",
-    "build": "rm -rf build; tsc",
-    "dev": "npm run build && npm run start"
+    "start": "node build/index.js",
+    "clean": "rm -rf ./build && mkdir -p build",
+    "build": "esbuild src/index.ts  --outdir=build --platform=node",
+    "dev": "npm run clean && npm run build && npm run start"
   }
 }
